@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #12121a;
+      --border:    #1e1e2e;
+      --accent:    #6c63ff;
+      --accent-glow: rgba(108,99,255,.35);
+      --text:      #e8e8f0;
+      --muted:     #6b6b80;
+      --error:     #ff5c7a;
+      --success:   #3dd68c;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* ── animated background orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(108,99,255,.18); top: -120px; left: -100px; animation-duration: 14s; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(61,214,140,.12); bottom: -100px; right: -80px; animation-duration: 10s; animation-delay: -5s; }
+    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(40px, 30px) scale(1.08); } }
+
+    /* ── card ── */
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 40px 40px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.03), 0 40px 80px rgba(0,0,0,.6);
+      animation: slideUp .5s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes slideUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── logo mark ── */
+    .logo {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 24px;
+    }
+    .logo svg { width: 22px; height: 22px; fill: #fff; }
+
+    h1 { font-size: 22px; font-weight: 700; letter-spacing: -.3px; }
+    .subtitle { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+    /* ── form ── */
+    form { margin-top: 32px; display: flex; flex-direction: column; gap: 20px; }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    label { font-size: 13px; font-weight: 500; color: #c2c2d4; }
+
+    .input-wrap {
+      position: relative;
+      display: flex; align-items: center;
+    }
+    .input-wrap svg {
+      position: absolute; left: 14px;
+      width: 16px; height: 16px;
+      color: var(--muted);
+      pointer-events: none;
+      transition: color .2s;
+    }
+    input {
+      width: 100%;
+      background: #0d0d16;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 14px 13px 42px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    input::placeholder { color: var(--muted); }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    input:focus + svg, .input-wrap:focus-within svg { color: var(--accent); }
+
+    /* eye toggle */
+    .eye-btn {
+      position: absolute; right: 12px;
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); padding: 4px;
+      transition: color .2s;
+      display: flex; align-items: center;
+    }
+    .eye-btn:hover { color: var(--text); }
+    .eye-btn svg { width: 16px; height: 16px; }
+
+    /* remember + forgot */
+    .row {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 13px;
+    }
+    .remember { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #c2c2d4; }
+    .remember input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+    .forgot { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .forgot:hover { text-decoration: underline; }
+
+    /* submit */
+    .btn {
+      padding: 14px;
+      background: var(--accent);
+      border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 600;
+      font-family: inherit;
+      color: #fff;
+      cursor: pointer;
+      transition: background .2s, transform .1s, box-shadow .2s;
+      box-shadow: 0 4px 24px var(--accent-glow);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover { background: #7c74ff; box-shadow: 0 6px 30px var(--accent-glow); }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+
+    /* spinner inside button */
+    .spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* alert */
+    .alert {
+      display: none;
+      font-size: 13px;
+      border-radius: 8px;
+      padding: 11px 14px;
+      animation: fadeIn .3s ease;
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+    .alert.error  { background: rgba(255,92,122,.1); border: 1px solid rgba(255,92,122,.3); color: var(--error); }
+    .alert.success{ background: rgba(61,214,140,.1); border: 1px solid rgba(61,214,140,.3); color: var(--success); }
+
+    /* divider */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 12px; color: var(--muted);
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--border);
+    }
+
+    /* register link */
+    .register { text-align: center; font-size: 13px; color: var(--muted); }
+    .register a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .register a:hover { text-decoration: underline; }
+
+    /* success overlay */
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+      z-index: 99;
+    }
+    .overlay.show { display: flex; animation: fadeIn .3s ease; }
+    .overlay-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      text-align: center;
+      max-width: 340px;
+      width: 90%;
+    }
+    .check-circle {
+      width: 60px; height: 60px;
+      background: rgba(61,214,140,.15);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .check-circle svg { width: 28px; height: 28px; color: var(--success); }
+    .overlay-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .overlay-box p  { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+    .redirect-bar {
+      height: 4px; background: var(--border); border-radius: 99px; overflow: hidden;
+    }
+    .redirect-fill {
+      height: 100%; background: linear-gradient(90deg, var(--accent), #a78bfa);
+      border-radius: 99px;
+      animation: fill 2s linear forwards;
+    }
+    @keyframes fill { from{width:0} to{width:100%} }
+
+    @media (max-width: 480px) {
+      .card { padding: 36px 24px 32px; margin: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="card">
+
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+
+    <h1>Selamat datang</h1>
+    <p class="subtitle">Masuk ke akun Anda untuk melanjutkan</p>
+
+    <form id="loginForm" novalidate>
+
+      <div class="alert" id="alertBox"></div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <div class="input-wrap">
+          <input type="email" id="email" placeholder="nama@email.com" autocomplete="email" required />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="2" y="4" width="20" height="16" rx="3"/>
+            <path d="M2 7l10 7 10-7"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <button type="button" class="eye-btn" id="eyeBtn" aria-label="Tampilkan password">
+            <!-- eye open -->
+            <svg id="eyeOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <!-- eye closed (hidden by default) -->
+            <svg id="eyeClosed" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="remember">
+          <input type="checkbox" id="remember" /> Ingat saya
+        </label>
+        <a href="#" class="forgot">Lupa password?</a>
+      </div>
+
+      <button type="submit" class="btn" id="submitBtn">
+        <span id="btnText">Masuk</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+
+      <div class="divider">atau</div>
+
+      <p class="register">Belum punya akun? <a href="#">Daftar sekarang</a></p>
+
+    </form>
+  </div>
+
+  <!-- Success overlay -->
+  <div class="overlay" id="overlay">
+    <div class="overlay-box">
+      <div class="check-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h2>Login berhasil!</h2>
+      <p>Mengalihkan Anda ke halaman tujuan…</p>
+      <div class="redirect-bar"><div class="redirect-fill"></div></div>
+    </div>
+  </div>
+
+  <script>
+    // ─── KONFIGURASI ────────────────────────────────────────────────
+    // Ganti URL di bawah ini dengan URL tujuan Anda
+    const REDIRECT_URL = "https://sigapsdkabbadung-beep.github.io/Sigap-prod/";
+
+    // Kredensial demo (ganti sesuai kebutuhan)
+    const VALID_EMAIL    = "user@example.com";
+    const VALID_PASSWORD = "password123";
+    // ────────────────────────────────────────────────────────────────
+
+    const form      = document.getElementById('loginForm');
+    const alertBox  = document.getElementById('alertBox');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText   = document.getElementById('btnText');
+    const spinner   = document.getElementById('spinner');
+    const overlay   = document.getElementById('overlay');
+    const eyeBtn    = document.getElementById('eyeBtn');
+    const eyeOpen   = document.getElementById('eyeOpen');
+    const eyeClosed = document.getElementById('eyeClosed');
+    const pwInput   = document.getElementById('password');
+
+    // Toggle password visibility
+    eyeBtn.addEventListener('click', () => {
+      const visible = pwInput.type === 'text';
+      pwInput.type = visible ? 'password' : 'text';
+      eyeOpen.style.display   = visible ? '' : 'none';
+      eyeClosed.style.display = visible ? 'none' : '';
+    });
+
+    function showAlert(msg, type) {
+      alertBox.textContent = msg;
+      alertBox.className   = 'alert ' + type;
+      alertBox.style.display = 'block';
+    }
+
+    function setLoading(on) {
+      submitBtn.disabled    = on;
+      btnText.style.display = on ? 'none' : 'block';
+      spinner.style.display = on ? 'block' : 'none';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.style.display = 'none';
+
+      const email    = document.getElementById('email').value.trim();
+      const password = pwInput.value;
+
+      if (!email || !password) {
+        showAlert('Harap isi semua kolom.', 'error');
+        return;
+      }
+
+      setLoading(true);
+
+      // Simulasi delay network (hapus/ganti dengan fetch ke API nyata)
+      await new Promise(r => setTimeout(r, 1400));
+
+      if (email === VALID_EMAIL && password === VALID_PASSWORD) {
+        setLoading(false);
+        overlay.classList.add('show');
+        // Redirect setelah animasi selesai (2 detik)
+        setTimeout(() => { window.location.href = REDIRECT_URL; }, 2200);
+      } else {
+        setLoading(false);
+        showAlert('Email atau password salah. Coba lagi.', 'error');
+      }
+    });
+  </script>
+</body>
+</html>
